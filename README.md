@@ -7,27 +7,33 @@
 
 ## 🚀 GitHub Pages への公開方法
 
-本プロジェクトは GitHub Pages に即座に公開できるよう設定済みです（`vite.config.ts` で `base: './'` の相対パス設定済み、自動ビルド用 GitHub Actions ワークフロー完備）。
+以下の **【方法1（最も確実・設定変更のみ）】** または **【方法2（GitHub Actions自動ビルド）】** のいずれかで簡単に公開できます。
 
-### 手順
+---
 
-1. **GitHubリポジトリにプッシュ**
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit"
-   git branch -M main
-   git remote add origin https://github.com/<あなたのユーザー名>/<リポジトリ名>.git
-   git push -u origin main
-   ```
+### 【方法1】 `docs` フォルダから公開（一番簡単・エラーなし）
 
-2. **GitHub Pages の設定を「GitHub Actions」にする**
-   - GitHubのリポジトリページで **[Settings]** タブを開きます。
-   - 左側メニューの **[Pages]** を選択します。
-   - **[Build and deployment]** > **[Source]** で **「GitHub Actions」** を選択します。
+ビルドエラーや権限設定の心配がなく、GitHubの設定を1箇所変えるだけで今すぐ確実に公開できます！
 
-3. **公開完了**
-   - push されると自動でビルド＆デプロイが実行され、`https://<あなたのユーザー名>.github.io/<リポジトリ名>/` で公開されます。
+1. GitHubのリポジトリページを開きます。
+2. 上部メニューの **[Settings]** をクリックします。
+3. 左側メニューの **[Pages]** をクリックします。
+4. **[Build and deployment]** で以下のように選択します：
+   - **Source**: `Deploy from a branch`
+   - **Branch**: `main`
+   - **Folder**: `/docs`
+5. **[Save]** ボタンを押します。
+6. 数十秒で `https://<ユーザー名>.github.io/<リポジトリ名>/` にてツールが公開されます！
+
+---
+
+### 【方法2】 GitHub Actions で自動ビルドして公開する場合
+
+1. GitHubリポジトリの **[Settings]** > **[Pages]** を開きます。
+2. **[Build and deployment]** > **[Source]** のプルダウンで **「GitHub Actions」** を選択します。
+   > ※ `exit code 1` が出る最大の原因は、ここが「GitHub Actions」になっていないことです。必ず「GitHub Actions」を選択してください。
+3. コードを push すると、自動的にビルド＆公開されます。
+
 
 ---
 

@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>利息・源泉税 逆算ツール</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --accent-color: #3498db;
+            --bg-color: #f4f7f6;
+        }
+        html, body { height: 100%; margin: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 400px;
+            align-self: flex-start;
+        }
+        h1 {
+            font-size: 1.25rem;
+            color: var(--primary-color);
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 24px;
+        }
+        .form-group { margin-bottom: 20px; }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            box-sizing: border-box;
+            outline: none;
+            transition: border-color 0.3s;
+            text-align: right;
+        }
+        input[type="number"]:focus {
+            border-color: var(--accent-color);
+        }
+        button[type="submit"] {
+            width: 100%;
+            padding: 15px;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button[type="submit"]:hover {
+            background-color: #2980b9;
+        }
+        .result-area {
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px dashed #eee;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            font-size: 1.1rem;
+        }
+        .result-label { color: #666; font-size: 0.95rem; }
+        .result-value { font-weight: bold; color: var(--primary-color); font-size: 1.25rem; }
+        .highlight { color: #e74c3c; font-size: 1.25rem; }
+        .copy-btn {
+            background: none;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 0.75rem;
+            color: #666;
+            cursor: pointer;
+            margin-left: 8px;
+        }
+        .copy-btn:hover {
+            border-color: var(--accent-color);
+            color: var(--accent-color);
+        }
+    </style>
+</head>
+<body id="bodyArea">
+
+<div class="container" id="mainContainer">
+    <h1>利息・源泉税 逆算</h1>
+    
+    <form onsubmit="calculate(event)">
+        <div class="form-group">
+            <label for="netAmount">通帳の入金額 (円)</label>
+            <input type="number" id="netAmount" placeholder="タップして入力" inputmode="numeric" autofocus oninput="calculate(event)">
+        </div>
+        <button type="submit">計算実行</button>
+    </form>
+
+    <div class="result-area" id="results" style="display:none;">
+        <div class="result-item">
+            <span class="result-label">利息総額（額面）:</span>
+            <div>
+                <span class="result-value" id="grossResult">-</span>
+                <button type="button" class="copy-btn" onclick="copyVal('grossResult')">コピー</button>
+            </div>
+        </div>
+        <div class="result-item">
+            <span class="result-label">源泉徴収税額計:</span>
+            <div>
+                <span class="result-value highlight" id="taxResult">-</span>
+                <button type="button" class="copy-btn" onclick="copyVal('taxResult')">コピー</button>
+            </div>
+        </div>
+        <div class="result-item" style="font-size: 0.8rem; color: #999; margin-top: 10px;">
+            ※所得税15%・復興税0.315%の合算
+        </div>
+    </div>
+</div>
+
+<script>
+    const inputField = document.getElementById('netAmount');
+
+    // 画面のどこを触っても入力欄にフォーカスを当てる
+    document.addEventListener('click', function(e) {
+        if (e.target.tagName !== 'BUTTON' && !e.target.closest('button')) {
+            inputField.focus();
+        }
+    });
+
+    window.onload = () => inputField.focus();
+
+    function copyVal(id) {
+        const text = document.getElementById(id).innerText.replace(/[^0-9]/g, '');
+        navigator.clipboard.writeText(text);
+        alert('コピーしました: ' + text + ' 円');
+    }
+
+    function calculate(event) {
+        if (event && event.type === 'submit') event.preventDefault();
+
+        const net = parseInt(inputField.value, 10);
+        const resultArea = document.getElementById('results');
+        if (isNaN(net) || net <= 0) {
+            resultArea.style.display = 'none';
+            return;
+        }
+
+        // 逆算ロジック (所得税15% + 復興税0.315% = 15.315%)
+        let gross = Math.floor(net / 0.84685);
+        
+        function getTax(g) {
+            const tax1 = Math.floor(g * 0.15);
+            const tax2 = Math.floor(g * 0.00315);
+            return tax1 + tax2;
+        }
+
+        let currentTax = getTax(gross);
+        let currentNet = gross - currentTax;
+
+        let safety = 0;
+        while (currentNet < net && safety < 10) {
+            gross++;
+            currentTax = getTax(gross);
+            currentNet = gross - currentTax;
+            safety++;
+        }
+        safety = 0;
+        while (currentNet > net && safety < 10) {
+            gross--;
+            currentTax = getTax(gross);
+            currentNet = gross - currentTax;
+            safety++;
+        }
+
+        resultArea.style.display = 'block';
+        document.getElementById('grossResult').innerText = gross.toLocaleString() + " 円";
+        document.getElementById('taxResult').innerText = currentTax.toLocaleString() + " 円";
+    }
+</script>
+
+</body>
+</html>
