@@ -1,0 +1,6 @@
+{
+  "name": "利息・源泉税 逆算ツール",
+  "description": "通帳の受取利息（手取り額）から利息総額（額面）と源泉徴収税額を瞬時に逆算。法人・個人両対応、仕訳生成、GitHub Pages公開対応。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
