@@ -39,9 +39,7 @@ export default function App() {
     let gross = Math.floor(net / 0.84685);
 
     function getTax(g: number) {
-      const tax1 = Math.floor(g * 0.15);
-      const tax2 = Math.floor(g * 0.00315);
-      return tax1 + tax2;
+      return Math.floor(g * 0.15315);
     }
 
     let currentTax = getTax(gross);
